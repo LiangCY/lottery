@@ -1,0 +1,44 @@
+.add-player {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+}
+
+.available {
+    position: fixed;
+    top: 200px;
+    right: 20px;
+    width: 200px;
+}
+
+.player-list {
+    margin: 20px;
+}
+
+.player-list table {
+    border-spacing: 0;
+}
+
+.player-list table th,
+.player-list table td {
+    padding: 8px 16px;
+    border-bottom: 1px solid #888;
+}
+
+.player-list td.numbers {
+    max-width: 500px;
+}
+
+.player-list td.numbers a {
+    display: inline-block;
+    width: 40px;
+    cursor: pointer;
+}
+
+.player-list td.numbers .inside a {
+    color: #42dcdc;
+}
+
+.player-list td.numbers .outside a {
+    color: #ed9877;
+}

@@ -8,7 +8,7 @@ class App extends Component {
         <nav className='nav'>
           <Link to='/'>Home</Link>
           <Link to='/game'>Game</Link>
-          <Link to='/record'>Record</Link>
+          <Link to='/players'>Players</Link>
         </nav>
         <div className='container'>
           {this.props.children}

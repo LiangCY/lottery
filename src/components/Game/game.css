@@ -29,6 +29,7 @@
 .game .map .dot {
     position: absolute;
     transform: translate(-50%, -50%);
+    background: #fff;
 }
 
 .game .map .circle {

@@ -22,7 +22,7 @@ ReactDOM.render(
       <Router history={history}>
         <Route path='/' component={App}>
           <Route path='/game' component={require('./components/Game').default} />
-          <Route path='/record' component={require('./components/Record').default} />
+          <Route path='/players' component={require('./components/Players').default} />
         </Route>
       </Router>
     </Provider>

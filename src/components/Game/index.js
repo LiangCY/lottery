@@ -10,7 +10,7 @@ class Game extends Component {
     const { game: { dots, circle }, dispatch } = this.props
     return (
       <div className='game'>
-        <button onClick={() => dispatch(generateMap())}>生成地图</button>
+        {/*<button onClick={() => dispatch(generateMap())}>生成地图</button>*/}
         <button onClick={() => dispatch(generateCircle({ x: 6, y: 6, r: 4 }))}>生成圆圈</button>
         <div className='map'>
           {Array.from({ length: 12 }).map((v, i) =>

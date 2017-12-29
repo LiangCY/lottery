@@ -1,4 +1,4 @@
-import { ADD, GENERATE_MAP, GENERATE_CIRCLE, ADD_PLAYER, REMOVE_PLAYER } from './actions'
+import { ADD, GENERATE_MAP, GENERATE_CIRCLE, ADD_PLAYER, REMOVE_PLAYER, CHANGE_NUMBER } from './actions'
 
 const HANDLERS = {
   [ADD]: (state) => {
@@ -39,8 +39,8 @@ const GAME_HANDLERS = {
     const emptyNumbers = dots.filter(d => !d.p).map(d => d.n)
     const randomIndex = Math.floor(Math.random() * emptyNumbers.length)
     const number = emptyNumbers[randomIndex]
-    const newDots = dots.map((d) => d.n === number ? { ...d, p: player } : d)
     const players = state.players.concat({ ...player, number })
+    const newDots = dots.map((d) => d.n === number ? { ...d, p: { ...player, number } } : d)
     return { ...state, players, dots: newDots }
   },
   [REMOVE_PLAYER]: (state, action) => {
@@ -49,6 +49,28 @@ const GAME_HANDLERS = {
     const player = players.find(p => p.id === id)
     const newDots = dots.map((d) => d.n === player.number ? { ...d, p: null } : d)
     const newPlayers = players.filter(p => p.id !== id)
+    return { ...state, players: newPlayers, dots: newDots }
+  },
+  [CHANGE_NUMBER]: (state, action) => {
+    const { id, number } = action.payload
+    const { players, dots } = state
+    let player = null
+    const newPlayers = players.map(p => {
+      if (p.id === id) {
+        player = { ...p, number }
+        return { ...player }
+      }
+      return p
+    })
+    const newDots = dots.map((d) => {
+      if (d.p && d.p.id === id) {
+        return { ...d, p: null }
+      } else if (d.n === number) {
+        return { ...d, p: player }
+      } else {
+        return d
+      }
+    })
     return { ...state, players: newPlayers, dots: newDots }
   }
 }
