@@ -1,17 +1,28 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux'
+import classNames from 'classnames'
 
 import './game.css'
 
-import { generateMap, generateCircle } from '../../redux/actions'
+import { clearAll, generateMap, generateCircle } from '../../redux/actions'
 
 class Game extends Component {
+  generateCircle = () => {
+    const { dispatch } = this.props
+    dispatch(generateCircle({ x: Math.random() + 5, y: Math.random() + 5, r: 3.9 }))
+  }
+
   render () {
-    const { game: { dots, circle }, dispatch } = this.props
+    const { game: { dots, circle } } = this.props
     return (
       <div className='game'>
+        {/*<div>*/}
+        {/*<button onClick={() => dispatch(clearAll())}>清空数据</button>*/}
         {/*<button onClick={() => dispatch(generateMap())}>生成地图</button>*/}
-        <button onClick={() => dispatch(generateCircle({ x: 6, y: 6, r: 4 }))}>生成圆圈</button>
+        {/*</div>*/}
+        <div>
+          <button onClick={() => this.generateCircle()}>生成圆圈</button>
+        </div>
         <div className='map'>
           {Array.from({ length: 12 }).map((v, i) =>
             <div key={i} className='line-h' style={{ top: i * 60 }}>
@@ -22,8 +33,8 @@ class Game extends Component {
             </div>
           )}
           {dots.map(({ x, y, n, p, hide }, i) =>
-            <span key={i} className='dot' title={p && p.name}
-                  style={{ left: x * 60, top: y * 60, color: p ? 'red' : 'black', display: hide ? 'none' : 'inline-block' }}>{n}</span>
+            <span key={i} className={classNames('dot', { hide, hold: !!p, outer: p && p.isOuter })} title={p && p.name}
+                  style={{ left: x * 60, top: y * 60 }}>{n}</span>
           )}
           {circle &&
           <div className='circle' style={{

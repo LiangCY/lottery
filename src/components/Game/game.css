@@ -28,6 +28,28 @@
 
 .game .map .dot {
     position: absolute;
+    display: inline-block;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    color: #666;
+}
+
+.game .map .dot.hide {
+    display: none;
+}
+
+.game .map .dot.hold {
+    color: #42dcdc;
+    font-weight: bold;
+}
+
+.game .map .dot.hold.outer {
+    color: #ed9877;
+}
+
+.game .map .dot {
+    position: absolute;
+    display: inline-block;
     transform: translate(-50%, -50%);
     background: #fff;
 }

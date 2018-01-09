@@ -4,14 +4,14 @@ import storage from 'redux-persist/es/storage'
 import { routerReducer as routing } from 'react-router-redux'
 import logger from 'redux-logger'
 
-import { counterReducer, gameReducer } from './reducers'
+import { gameReducer } from './reducers'
 
 const config = {
   key: 'root',
   storage,
 }
 
-const reducer = persistCombineReducers(config, { ...counterReducer, ...gameReducer, routing })
+const reducer = persistCombineReducers(config, { ...gameReducer, routing })
 
 export default function configureStore () {
   let store = createStore(reducer, applyMiddleware(logger))
