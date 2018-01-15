@@ -1,0 +1,37 @@
+.lottery-page {
+    text-align: center;
+}
+
+.lottery-page .round {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.lottery-page .numbers {
+    margin-top: 20px;
+}
+
+.lottery-page .num-item {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+    text-align: center;
+    margin-right: 10px;
+    background: cornflowerblue;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 16px;
+}
+
+.lottery-page .lucky {
+    margin-top: 20px;
+}
+
+.lottery-page .lucky .num-item {
+    background: darkseagreen;
+}
+
+.lottery-page .num-item.active {
+    background: orange;
+}

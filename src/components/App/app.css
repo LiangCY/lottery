@@ -1,0 +1,51 @@
+@import '~antd/dist/antd.css';
+
+.app {
+
+}
+
+.left-menu {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 160px;
+    padding-top: 60px;
+    border-right: 1px solid #e8e8e8;
+}
+
+.left-menu .menu-item {
+    display: block;
+    position: relative;
+    height: 40px;
+    line-height: 40px;
+    font-size: 16px;
+    padding-left: 40px;
+}
+
+.left-menu .menu-item.active {
+    background-color: #e6f7ff;
+}
+
+.left-menu .menu-item.active:after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #1890ff;
+}
+
+.left-menu .menu-item:focus {
+    text-decoration: none;
+}
+
+.left-menu .menu-item .anticon {
+    margin-right: 8px;
+}
+
+.container {
+    margin-left: 160px;
+    padding: 40px;
+}

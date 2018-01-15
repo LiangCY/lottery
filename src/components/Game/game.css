@@ -2,10 +2,44 @@
 
 }
 
+.game .init {
+    position: fixed;
+    right: 20px;
+    width: 120px;
+}
+
+.game .init .generate {
+    margin-top: 10px;
+}
+
+.game .init .tips {
+    margin-top: 12px;
+}
+
+.game .center-picker {
+    height: 32px;
+    margin-bottom: 20px;
+}
+
+.game .center-picker .hint {
+    margin-right: 20px;
+    color: #808080;
+}
+
+.game .center-picker .center-pos {
+    margin-right: 20px;
+    color: #22aa87;
+}
+
+.game .end-round {
+    height: 32px;
+}
+
 .game .map {
-    margin-top: 40px;
-    margin-left: 40px;
     position: relative;
+    margin-top: 40px;
+    width: 660px;
+    height: 660px;
 }
 
 .game .map .line-h {
@@ -31,7 +65,7 @@
     display: inline-block;
     transform: translate(-50%, -50%);
     background: #fff;
-    color: #666;
+    color: #333;
 }
 
 .game .map .dot.hide {
@@ -39,12 +73,17 @@
 }
 
 .game .map .dot.hold {
-    color: #42dcdc;
+    color: #00E600;
     font-weight: bold;
 }
 
 .game .map .dot.hold.outer {
-    color: #ed9877;
+    color: #3399CC;
+}
+
+.game .map .dot.hold.exit {
+    font-weight: normal;
+    color: #b5b6b7 !important;
 }
 
 .game .map .dot {
