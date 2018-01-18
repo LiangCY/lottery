@@ -1,72 +1,77 @@
 import {
   CLEAR_ALL, GENERATE_MAP, GENERATE_CIRCLE, END_ROUND,
   ADD_PLAYER, REMOVE_PLAYER, CHANGE_NUMBER,
-  ADD_LUCKY_GUY
+  ADD_LUCKY_GUY, LAST_ROUND
 } from './actions'
 
+
+const numbers = Array.from({length: 100}, (v, i) => i + 1)
+
+const numbersInCounts = [20, 6, 3]
+
 const GAME_HANDLERS = {
-  [CLEAR_ALL]: () => {
-    return {dots: [], players: [], lucky: {}, round: 0, status: 'game'}
+  [CLEAR_ALL]: (state) => {
+    return {...state, dots: [], circle: null, prevCircle: null, lucky: {}, round: 0, status: ''}
   },
   [GENERATE_MAP]: (state) => {
-    const randomArray = Array.from({length: 100}, (v, i) => i + 1)
-    randomArray.sort(() => Math.random() - 0.5)
-    const dots = randomArray.map((n, i) => ({x: i % 10 + 1, y: Math.floor(i / 10) + 1, n}))
+    const dots = Array.from({length: 100}).map((n, i) => ({x: i % 10 + 1, y: Math.floor(i / 10) + 1}))
     return {...state, dots}
   },
   [GENERATE_CIRCLE]: (state, action) => {
-    const {x, y} = action.payload
-    const {circle} = state
-    let r = 0
-    if (!circle) {
-      r = Math.min(x - 1, y - 1, 10 - x, 10 - y)
-      r = Math.max(r, 1)
-    } else {
-      const centerDistance = Math.sqrt((x - circle.x) * (x - circle.x) + (y - circle.y) * (y - circle.y))
-      r = circle.r - Math.max(centerDistance, 1)
-    }
-    const dots = state.dots.map((o) => {
-      const {x: dx, y: dy} = o
+    const {x, y, r} = action.payload
+    const {dots: prevDots, circle, players, round} = state
+    const numbersInCount = numbersInCounts[round]
+    const aliveNumbers = !circle ? numbers : prevDots.filter(d => !d.exit).map(d => d.number)
+    const usedNumbers = players.map(p => p.number)
+    const unusedNumbers = aliveNumbers.filter(n => !usedNumbers.includes(n))
+    const alivePlayers = players.filter(player => aliveNumbers.includes(player.number))
+    const shuffled = alivePlayers.filter(p => !p.isOuter).sort(() => Math.random() - 0.5).concat(alivePlayers.filter(p => p.isOuter))
+    const inNumbers = shuffled.slice(0, numbersInCount).map(p => p.number)
+    const outNumbers = shuffled.slice(numbersInCount).map(p => p.number)
+    let inIndex = 0
+    let outIndex = 0
+    let unusedIndex = 0
+    const dots = state.dots.slice().sort(() => Math.random() - 0.5).map((dot) => {
+      const {x: dx, y: dy, exit} = dot
+      if (exit) return dot
       if (Math.abs(x - dx) <= r && Math.abs(y - dy) <= r && (dx - x) * (dx - x) + (dy - y) * (dy - y) <= r * r) {
-        return {...o, hide: true}
+        if (inIndex < inNumbers.length) {
+          return {...dot, number: inNumbers[inIndex++]}
+        } else {
+          return {...dot, number: unusedNumbers[unusedIndex++]}
+        }
       } else {
-        return {...o, hide: false}
+        if (outIndex < outNumbers.length) {
+          return {...dot, number: outNumbers[outIndex++]}
+        } else {
+          return {...dot, number: unusedNumbers[unusedIndex++]}
+        }
       }
     })
     return {...state, circle: {x, y, r}, prevCircle: state.circle, dots, round: state.round + 1, status: 'game'}
   },
   [END_ROUND]: (state) => {
-    const {dots, players, round} = state
-    const outNumbers = dots.filter(d => d.p && !d.hide && !d.exit).map(d => d.n)
-    const newDots = dots.map((d) => {
-      if (d.p && outNumbers.includes(d.p.number)) {
-        return {...d, exit: round}
+    const {dots: prevDots, circle: {x, y, r}, round} = state
+    const dots = prevDots.map((dot) => {
+      const {x: dx, y: dy} = dot
+      if ((Math.abs(x - dx) > r || Math.abs(y - dy) > r || (dx - x) * (dx - x) + (dy - y) * (dy - y) > r * r) && !dot.exit) {
+        return {...dot, exit: round}
+      } else {
+        return dot
       }
-      return d
     })
-    const newPlayers = players.map((p) => {
-      if (outNumbers.includes(p.number)) {
-        return {...p, exit: round}
-      }
-      return p
-    })
-    return {...state, dots: newDots, players: newPlayers, status: 'lottery'}
+    return {...state, dots, status: 'lottery'}
   },
 
   [ADD_PLAYER]: (state, action) => {
     const player = action.payload
-    const {dots} = state
-    const emptyNumbers = dots.filter(d => !d.p && d.x !== 1 && d.x !== 10 && d.y !== 1 && d.y !== 10).map(d => d.n)
-    let randomIndex = Math.floor(Math.random() * emptyNumbers.length)
-    let number = emptyNumbers[randomIndex]
-    if (player.isOuter) {
-      const sideNumbers = dots.filter(d => !d.p && !d.hide && (d.x === 1 || d.x === 10 || d.y === 1 || d.y === 10)).map(d => d.n)
-      randomIndex = Math.floor(Math.random() * sideNumbers.length)
-      number = sideNumbers[randomIndex]
-    }
-    const players = state.players.concat({...player, number})
-    const newDots = dots.map((d) => d.n === number ? {...d, p: {...player, number}} : d)
-    return {...state, players, dots: newDots}
+    const prevPlayers = state.players
+    const usedNumbers = prevPlayers.map(p => p.number)
+    const availNumbers = numbers.filter(n => !usedNumbers.includes(n))
+    const randomIndex = Math.floor(Math.random() * availNumbers.length)
+    const number = availNumbers[randomIndex]
+    const players = prevPlayers.concat({...player, number})
+    return {...state, players}
   },
   [REMOVE_PLAYER]: (state, action) => {
     const {id} = action.payload
@@ -78,25 +83,14 @@ const GAME_HANDLERS = {
   },
   [CHANGE_NUMBER]: (state, action) => {
     const {id, number} = action.payload
-    const {players, dots} = state
-    let player = null
-    const newPlayers = players.map(p => {
-      if (p.id === id) {
-        player = {...p, number}
-        return {...player}
+    const {players: prevPlayers} = state
+    const players = prevPlayers.map(player => {
+      if (player.id === id) {
+        return {...player, number}
       }
-      return p
+      return player
     })
-    const newDots = dots.map((d) => {
-      if (d.p && d.p.id === id) {
-        return {...d, p: null}
-      } else if (d.n === number) {
-        return {...d, p: player}
-      } else {
-        return d
-      }
-    })
-    return {...state, players: newPlayers, dots: newDots}
+    return {...state, players}
   },
 
   [ADD_LUCKY_GUY]: (state, action) => {
@@ -108,6 +102,10 @@ const GAME_HANDLERS = {
       const numbers = lucky[round].concat(number)
       return {...state, lucky: {...lucky, [round]: numbers}}
     }
+  },
+  [LAST_ROUND]: (state) => {
+    const {round} = state
+    return {...state, round: round + 1}
   }
 }
 
@@ -116,7 +114,7 @@ const initialState = {
   players: [],
   lucky: {},
   round: 0,
-  status: 'game'
+  status: ''
 }
 
 function game(state = initialState, action) {

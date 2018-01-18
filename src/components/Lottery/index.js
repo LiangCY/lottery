@@ -5,7 +5,9 @@ import {Button} from 'antd'
 
 import './lottery.css'
 
-import {addLuckGuy} from '../../redux/actions'
+import {addLuckGuy, startLastRound} from '../../redux/actions'
+
+const awardCounts = [6, 4, 1, 1]
 
 class Lottery extends Component {
   constructor(props) {
@@ -14,32 +16,39 @@ class Lottery extends Component {
   }
 
   getExitDots = () => {
-    const {game: {dots, round}} = this.props
-    return dots.filter(d => d.p && d.exit === round)
+    const {game: {dots, players, round}} = this.props
+    const usedNumbers = players.filter(p => !p.isOuter).map(p => p.number)
+    if (round === 4) {
+      return dots.filter(d => usedNumbers.includes(d.number) && !d.exit)
+    } else {
+      return dots.filter(d => usedNumbers.includes(d.number) && d.exit === round)
+    }
   }
 
   getLuckyNumbers = () => {
     const {game: {lucky, round}} = this.props
     const luckyNumbers = lucky[round] || []
-    return this.getExitDots().map(d => d.p.number).filter(n => luckyNumbers.includes(n))
+    return this.getExitDots().map(d => d.number).filter(n => luckyNumbers.includes(n))
   }
-
 
   getLotteryNumbers = () => {
     const {game: {lucky, round}} = this.props
     const luckyNumbers = lucky[round] || []
-    return this.getExitDots().map(d => d.p.number).filter(n => !luckyNumbers.includes(n))
+    return this.getExitDots().map(d => d.number).filter(n => !luckyNumbers.includes(n))
   }
 
   start = () => {
     if (this.state.moving) return
+    const {game: {round, lucky}} = this.props
+    const luckyNumbers = lucky[round] || []
+    if (luckyNumbers.length >= awardCounts[round - 1]) return
     const total = this.getLotteryNumbers().length
     this.setState({moving: true})
     this.move(total)
   }
 
   move = (total) => {
-    this.setState({active: (this.state.active + 0.5) % total})
+    this.setState({active: (this.state.active + 1) % total})
     this.animation = requestAnimationFrame(() => this.move(total))
   }
 
@@ -48,19 +57,24 @@ class Lottery extends Component {
     cancelAnimationFrame(this.animation)
     const {dispatch} = this.props
     const {active} = this.state
-    const index = Math.floor(active)
     const otherNumbers = this.getLotteryNumbers()
-    const luckNumber = otherNumbers[index]
+    const luckNumber = otherNumbers[active]
     dispatch(addLuckGuy({number: luckNumber}))
     this.setState({active: -1, moving: false})
   }
 
+  startLastRound = () => {
+    if (this.state.moving) return
+    const {game: {round, lucky}, dispatch} = this.props
+    if (!lucky[round]) return
+    dispatch(startLastRound())
+  }
+
   render() {
-    const {game: {round}} = this.props
+    const {game: {round, status}} = this.props
     const {active, moving} = this.state
     const luckyNumbers = this.getLuckyNumbers()
     const otherNumbers = this.getLotteryNumbers()
-    const index = Math.floor(active)
     return (
       <div className='lottery-page'>
         <div className='round'>第{round}轮</div>
@@ -71,7 +85,7 @@ class Lottery extends Component {
         <div className='numbers'>
           <div className='others'>
             {otherNumbers.map((n, i) =>
-              <span key={i} className={classNames('num-item', {active: index === i})}>{n}</span>
+              <span key={i} className={classNames('num-item', {active: active === i})}>{n}</span>
             )}
           </div>
           <div className='lucky'>
@@ -80,6 +94,11 @@ class Lottery extends Component {
             )}
           </div>
         </div>
+        {status === 'lottery' && round === 3 &&
+        <div className='last-round'>
+          <Button type='primary' size='large' onClick={this.startLastRound}>最后一轮</Button>
+        </div>
+        }
       </div>
     )
   }

@@ -16,7 +16,7 @@
     margin-top: 12px;
 }
 
-.game .center-picker {
+.game .actions {
     height: 32px;
     margin-bottom: 20px;
 }
@@ -26,13 +26,19 @@
     color: #808080;
 }
 
-.game .center-picker .center-pos {
+.game .center-picker .circle-center {
+    margin-right: 10px;
+    color: #22aa87;
+}
+
+.game .center-picker .circle-radius {
     margin-right: 20px;
     color: #22aa87;
 }
 
-.game .end-round {
-    height: 32px;
+.game .center-picker .count {
+    margin-right: 20px;
+    color: #2278dc;
 }
 
 .game .map {

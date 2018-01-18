@@ -9,11 +9,11 @@ class App extends Component {
     return (
       <div className='app'>
         <nav className='left-menu'>
-          <Link to='/game' className='menu-item' activeClassName='active'>
-            <Icon type='environment-o' />地图
-          </Link>
           <Link to='/players' className='menu-item' activeClassName='active'>
             <Icon type='team' />玩家
+          </Link>
+          <Link to='/game' className='menu-item' activeClassName='active'>
+            <Icon type='environment-o' />地图
           </Link>
           <Link to='/lottery' className='menu-item' activeClassName='active'>
             <Icon type='pay-circle-o' />抽奖

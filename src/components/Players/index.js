@@ -38,17 +38,54 @@ class Record extends Component {
     })
   }
 
-  isInside = (id) => {
-    const {game: {dots}} = this.props
-    const dot = dots.find(d => d.p && d.p.id === id)
-    return dot && dot.hide
+  isInside = ({number}) => {
+    const {game: {dots, circle}} = this.props
+    const dot = dots.find(d => d.number === number)
+    const {x, y} = dot
+    return (x - circle.x) * (x - circle.x) + (y - circle.y) * (y - circle.y) < circle.r * circle.r
+  }
+
+  getPlayerStatus = (player) => {
+    const {game: {dots, lucky, round}} = this.props
+    const playerDot = dots.find(dot => dot.number === player.number)
+    if (!playerDot) return ''
+    if (!playerDot.exit) {
+      if (round === 4) {
+        return lucky[4].includes(player.number) ? `最后一轮中奖` : `最后一轮淘汰`
+      } else {
+        return this.isInside(player) ? '圈内' : '圈外'
+      }
+    }
+    const luckyNumbers = lucky[playerDot.exit] || []
+    return luckyNumbers.includes(player.number) ? `第${playerDot.exit}轮中奖` : `第${playerDot.exit}轮淘汰`
   }
 
   getAvailableNumbers = (inside = true) => {
-    const {game: {dots}} = this.props
-    const array = dots.filter(d => (inside ? d.hide : !d.hide) && !d.p)
-    array.sort((a, b) => a.n - b.n)
-    return array
+    const {game: {dots, circle, players}} = this.props
+    const aliveDots = dots.filter(dot => !dot.exit)
+    const aliveNumbers = aliveDots.map(dot => dot.number)
+    const alivePlayers = players.filter(player => aliveNumbers.includes(player.number))
+    const usedNumbers = alivePlayers.map(player => player.number)
+    const inArr = []
+    const outArr = []
+    aliveDots.forEach(dot => {
+      const {x, y, number} = dot
+      if (usedNumbers.includes(number)) return
+      if ((circle.x - x) * (circle.x - x) + (circle.y - y) * (circle.y - y) <= circle.r * circle.r) {
+        inArr.push(dot.number)
+      } else {
+        outArr.push(dot.number)
+      }
+    })
+    return inside ? inArr : outArr
+  }
+
+  canChangeNumber = (player) => {
+    if (player.isOuter) return false
+    const {game: {dots, round}} = this.props
+    if (round === 4) return false
+    const exitNumbers = dots.filter(dot => dot.exit).map(dot => dot.number)
+    return !exitNumbers.includes(player.number)
   }
 
   handleChangeNumber = () => {
@@ -59,7 +96,7 @@ class Record extends Component {
   }
 
   render() {
-    const {game: {players, lucky}} = this.props
+    const {game: {players}} = this.props
     const {filterValue, showNumbersModal, selectedNumber} = this.state
     const availableInside = this.getAvailableNumbers(true)
     const availableOutside = this.getAvailableNumbers(false)
@@ -86,7 +123,6 @@ class Record extends Component {
               <th>姓名</th>
               <th>数字</th>
               <th>状态</th>
-              <th>中奖信息</th>
               <th>换号</th>
               <th>删除</th>
             </tr>
@@ -97,13 +133,12 @@ class Record extends Component {
                 <td>{player.id}</td>
                 <td>{player.name}</td>
                 <td>{player.number}</td>
-                <td>{player.exit ? `第${player.exit}轮淘汰` : this.isInside(player.id) ? '圈内' : '圈外'}</td>
-                <td>{player.exit && lucky[player.exit].includes(player.number) && `第${player.exit}轮中奖`}</td>
-                {player.isOuter || player.exit ?
-                  <td/> :
+                <td>{this.getPlayerStatus(player)}</td>
+                {this.canChangeNumber(player) ?
                   <td style={{width: 72}}>
                     <Button type='primary' onClick={() => this.setState({selectingPlayer: player, showNumbersModal: true})}>换号</Button>
-                  </td>
+                  </td> :
+                  <td/>
                 }
                 <td style={{width: 72}}><Button type='danger' ghost onClick={() => this.remove(player.id)}>删除</Button></td>
               </tr>
@@ -115,16 +150,16 @@ class Record extends Component {
           <div className='list list-in'>
             <div>圈内可选（{availableInside.length}）</div>
             <div>
-              {availableInside.map((d, i) =>
-                <span key={i} className='num-item'>{d.n}</span>
+              {availableInside.map((n, i) =>
+                <span key={i} className='num-item'>{n}</span>
               )}
             </div>
           </div>
           <div className='list list-out'>
             <div>圈外可选（{availableOutside.length}）</div>
             <div>
-              {availableOutside.map((d, i) =>
-                <span key={i} className='num-item'>{d.n}</span>
+              {availableOutside.map((n, i) =>
+                <span key={i} className='num-item'>{n}</span>
               )}
             </div>
           </div>
@@ -137,16 +172,16 @@ class Record extends Component {
           <div className='numbers numbers-in'>
             <div className='title'>圈内可选</div>
             <div className='list'>
-              {availableInside.map((d, i) =>
-                <span key={i} onClick={() => this.setState({selectedNumber: d.n})}>{d.n}</span>
+              {availableInside.map((n, i) =>
+                <span key={i} onClick={() => this.setState({selectedNumber: n})}>{n}</span>
               )}
             </div>
           </div>
           <div className='numbers numbers-out'>
             <div className='title'>圈外可选</div>
             <div className='list'>
-              {availableOutside.map((d, i) =>
-                <span key={i} onClick={() => this.setState({selectedNumber: d.n})}>{d.n}</span>
+              {availableOutside.map((n, i) =>
+                <span key={i} onClick={() => this.setState({selectedNumber: n})}>{n}</span>
               )}
             </div>
           </div>

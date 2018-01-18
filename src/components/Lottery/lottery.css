@@ -35,3 +35,7 @@
 .lottery-page .num-item.active {
     background: orange;
 }
+
+.lottery-page .last-round {
+    margin-top: 80px;
+}
