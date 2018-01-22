@@ -149,7 +149,9 @@ class Game extends Component {
           <div className='circle' style={{
             width: circle.r * 2 * 60, height: circle.r * 2 * 60,
             left: (circle.x - circle.r) * 60, top: (circle.y - circle.r) * 60
-          }}/>
+          }}>
+            <div className='radar'/>
+          </div>
           }
         </div>
       </div>

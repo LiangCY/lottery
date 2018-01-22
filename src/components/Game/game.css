@@ -78,13 +78,13 @@
     display: none;
 }
 
-.game .map .dot.hold {
-    color: #00E600;
-    font-weight: bold;
+.game .map .dot:not(.hold) {
+    display: none;
 }
 
-.game .map .dot.hold.outer {
+.game .map .dot.hold {
     color: #3399CC;
+    font-weight: bold;
 }
 
 .game .map .dot.hold.exit {
@@ -101,7 +101,31 @@
 
 .game .map .circle {
     position: absolute;
-    background: aquamarine;
+    background: rgba(20, 255, 90, 0.2);
     border-radius: 50%;
     opacity: .6;
+}
+
+.game .map .circle > .radar {
+    content: ' ';
+    display: block;
+    background-image: linear-gradient(45deg, rgba(0, 255, 51, 0) 50%, #16cc55 100%);
+    width: 50%;
+    height: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation: rotate 3s infinite;
+    animation-timing-function: linear;
+    transform-origin: bottom right;
+    border-radius: 100% 0 0 0;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
