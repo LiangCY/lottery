@@ -51,7 +51,7 @@ class Record extends Component {
     if (!playerDot) return ''
     if (!playerDot.exit) {
       if (round === 4) {
-        return lucky[4].includes(player.number) ? `最后一轮中奖` : `最后一轮淘汰`
+        return (lucky[4] || []).includes(player.number) ? `最后一轮中奖` : `最后一轮淘汰`
       } else {
         return this.isInside(player) ? '圈内' : '圈外'
       }
@@ -71,6 +71,7 @@ class Record extends Component {
     aliveDots.forEach(dot => {
       const {x, y, number} = dot
       if (usedNumbers.includes(number)) return
+      if (!circle) return
       if ((circle.x - x) * (circle.x - x) + (circle.y - y) * (circle.y - y) <= circle.r * circle.r) {
         inArr.push(dot.number)
       } else {
@@ -81,7 +82,6 @@ class Record extends Component {
   }
 
   canChangeNumber = (player) => {
-    if (player.isOuter) return false
     const {game: {dots, round}} = this.props
     if (round === 4) return false
     const exitNumbers = dots.filter(dot => dot.exit).map(dot => dot.number)
@@ -91,8 +91,14 @@ class Record extends Component {
   handleChangeNumber = () => {
     const {selectingPlayer, selectedNumber} = this.state
     if (!selectingPlayer || !selectedNumber) return
-    this.props.dispatch(changeNumber(({id: selectingPlayer.id, number: selectedNumber})))
-    this.setState({selectingPlayerId: null, selectedNumber: null, showNumbersModal: false})
+    const successRate = selectingPlayer.isOuter ? 0 : 0.5
+    if (Math.random() < successRate) {
+      Modal.success({title: '换号结果', content: '恭喜您，换号成功~'})
+      this.props.dispatch(changeNumber(({id: selectingPlayer.id, number: selectedNumber})))
+    } else {
+      Modal.error({title: '换号结果', content: '很抱歉，换号失败...'})
+    }
+    this.setState({selectingPlayer: null, selectedNumber: null, showNumbersModal: false})
   }
 
   render() {
