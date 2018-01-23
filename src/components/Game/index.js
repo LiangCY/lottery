@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux'
 import classNames from 'classnames'
-import {Button, Modal} from 'antd'
+import {Button, Modal, message} from 'antd'
 
 import './game.css'
 
@@ -28,6 +28,8 @@ class Game extends Component {
   }
 
   openPicker = () => {
+    const {game: {players}} = this.props
+    if (players.find(p => !p.number)) return message.warn('尚有玩家未分配号码', 1)
     this.setState({picking: true})
   }
 

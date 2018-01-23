@@ -66,11 +66,13 @@ const GAME_HANDLERS = {
   [ADD_PLAYER]: (state, action) => {
     const player = action.payload
     const prevPlayers = state.players
-    const usedNumbers = prevPlayers.map(p => p.number)
-    const availNumbers = numbers.filter(n => !usedNumbers.includes(n))
-    const randomIndex = Math.floor(Math.random() * availNumbers.length)
-    const number = availNumbers[randomIndex]
-    const players = prevPlayers.concat({...player, number})
+    const index = prevPlayers.map(p => p.id).indexOf(player.id)
+    let players = prevPlayers
+    if (index < 0) {
+      players = prevPlayers.concat(player)
+    } else {
+      players = prevPlayers.slice(0, index).concat(player).concat(prevPlayers.slice(index + 1))
+    }
     return {...state, players}
   },
   [REMOVE_PLAYER]: (state, action) => {

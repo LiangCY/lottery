@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux'
-import {Button, Modal, Input, Checkbox} from 'antd'
+import {Button, Modal, Input, Checkbox, message} from 'antd'
 
 import './players.css'
 
@@ -10,18 +10,27 @@ class Record extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      id: '', number: '', isOuter: false,
       showNumbersModal: false
     }
   }
 
   add = () => {
-    const id = this.idInput.input.value
-    const name = this.nameInput.input.value
-    const isOuter = this.isOuterInput.rcCheckbox.state.checked
-    if (!id || !name) return
-    const {game: {players}, dispatch} = this.props
-    if (players.map(p => p.id).includes(id)) return
-    dispatch(addPlayer({id, name, isOuter}))
+    const {game: {round, players}, dispatch} = this.props
+    const {id, number, isOuter} = this.state
+    if (!id) return message.warn('请输入姓名', 1)
+    if (!number || !number.trim()) return dispatch(addPlayer({id, isOuter}))
+    const convertNumber = parseInt(number)
+    if (!(convertNumber >= 1 && convertNumber <= 100)) return message.warn('请输入1至100之间的号码', 1)
+    if (round > 0) return message.warn('游戏已开始，无法操作', 1)
+    const usedNumbers = players.filter(p => p.number).map(p => p.number)
+    if (usedNumbers.includes(convertNumber)) return message.warn('号码已经被使用', 1)
+    dispatch(addPlayer({id, number: convertNumber, isOuter}))
+    this.setState({id: '', number: '', isOuter: false})
+  }
+
+  update = (player) => {
+    this.setState({id: player.id, number: player.number, isOuter: player.isOuter})
   }
 
   remove = (id) => {
@@ -47,7 +56,7 @@ class Record extends Component {
 
   getPlayerStatus = (player) => {
     const {game: {dots, lucky, round}} = this.props
-    const playerDot = dots.find(dot => dot.number === player.number)
+    const playerDot = dots.find(dot => player.number && dot.number === player.number)
     if (!playerDot) return ''
     if (!playerDot.exit) {
       if (round === 4) {
@@ -102,22 +111,24 @@ class Record extends Component {
   }
 
   render() {
-    const {game: {players}} = this.props
-    const {filterValue, showNumbersModal, selectedNumber} = this.state
+    const {game: {round, players}} = this.props
+    const {filterValue, showNumbersModal, selectedNumber, id, number, isOuter} = this.state
     const availableInside = this.getAvailableNumbers(true)
     const availableOutside = this.getAvailableNumbers(false)
     return (
       <div className='players-page'>
+        {round === 0 &&
         <div className='add-player'>
-          <div className='field'><span>姓名</span><Input ref={input => this.nameInput = input}/></div>
-          <div className='field'><span>工号</span><Input ref={input => this.idInput = input}/></div>
+          <div className='field'><span>姓名</span><Input value={id} onChange={e => this.setState({id: e.target.value})}/></div>
+          <div className='field'><span>号码</span><Input value={number} onChange={e => this.setState({number: e.target.value})}/></div>
           <div className='field'>
-            <Checkbox ref={input => this.isOuterInput = input}>外包</Checkbox>
+            <Checkbox checked={isOuter} onChange={e => this.setState({isOuter: e.target.checked})}>外包</Checkbox>
           </div>
           <div className='actions'>
-            <Button type='primary' onClick={this.add}>添加</Button>
+            <Button type='primary' onClick={this.add}>添加/更新</Button>
           </div>
         </div>
+        }
         <div className='player-list'>
           <div className='filter'>
             <Input placeholder='输入姓名筛选' value={filterValue} onChange={e => this.setState({filterValue: e.target.value})}/>
@@ -125,19 +136,17 @@ class Record extends Component {
           <table>
             <thead>
             <tr>
-              <th>工号</th>
               <th>姓名</th>
-              <th>数字</th>
+              <th>号码</th>
               <th>状态</th>
               <th>换号</th>
-              <th>删除</th>
+              <th>操作</th>
             </tr>
             </thead>
             <tbody>
-            {players.slice().reverse().filter(({name}) => name.includes(filterValue || '')).map((player, i) =>
+            {players.slice().reverse().filter(({id}) => id.includes(filterValue || '')).map((player, i) =>
               <tr key={i}>
                 <td>{player.id}</td>
-                <td>{player.name}</td>
                 <td>{player.number}</td>
                 <td>{this.getPlayerStatus(player)}</td>
                 {this.canChangeNumber(player) ?
@@ -146,7 +155,10 @@ class Record extends Component {
                   </td> :
                   <td/>
                 }
-                <td style={{width: 72}}><Button type='danger' ghost onClick={() => this.remove(player.id)}>删除</Button></td>
+                <td style={{width: 1, whiteSpace: 'nowrap'}}>
+                  {round === 0 && <Button type='primary' ghost onClick={() => this.update(player)} style={{marginRight: 6}}>编辑</Button>}
+                  {round === 0 && <Button type='danger' ghost onClick={() => this.remove(player.id)}>删除</Button>}
+                </td>
               </tr>
             )}
             </tbody>

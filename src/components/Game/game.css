@@ -46,6 +46,8 @@
     margin-top: 40px;
     width: 660px;
     height: 660px;
+    background: url("./map.jpg") no-repeat center;
+    background-size: contain;
 }
 
 .game .map .line-h {
@@ -55,6 +57,7 @@
     height: 2px;
     background: #ddd;
     transform: translateY(-1px);
+    opacity: 0;
 }
 
 .game .map .line-v {
@@ -64,14 +67,13 @@
     height: 660px;
     background: #ddd;
     transform: translateX(-1px);
+    opacity: 0;
 }
 
 .game .map .dot {
     position: absolute;
     display: inline-block;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    color: #333;
+    transform: translate(-50%, -100%);
 }
 
 .game .map .dot.hide {
@@ -83,20 +85,19 @@
 }
 
 .game .map .dot.hold {
-    color: #3399CC;
+    width: 37px;
+    height: 47px;
+    color: #fff;
     font-weight: bold;
+    font-size: 20px;
+    background: url("./dot.png") no-repeat center;
+    text-align: center;
+    padding-top: 2px;
 }
 
 .game .map .dot.hold.exit {
     font-weight: normal;
     color: #b5b6b7 !important;
-}
-
-.game .map .dot {
-    position: absolute;
-    display: inline-block;
-    transform: translate(-50%, -50%);
-    background: #fff;
 }
 
 .game .map .circle {
