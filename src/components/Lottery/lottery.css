@@ -1,5 +1,9 @@
 .lottery-page {
     text-align: center;
+    background: url("./background.jpg") no-repeat center;
+    background-size: cover;
+    height: calc(100vh - 80px);
+    padding: 20px 40px;
 }
 
 .lottery-page .round {
@@ -7,21 +11,30 @@
     margin-bottom: 20px;
 }
 
+.lottery-page .actions .ant-input {
+    width: 200px;
+}
+
 .lottery-page .numbers {
-    margin-top: 20px;
+    margin-top: 40px;
 }
 
 .lottery-page .num-item {
     display: inline-block;
-    width: 48px;
-    height: 48px;
-    line-height: 48px;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
     text-align: center;
-    margin-right: 10px;
-    background: cornflowerblue;
+    margin-bottom: 40px;
+    background: #66B3FF;
     color: #fff;
     border-radius: 50%;
-    font-size: 16px;
+    font-size: 24px;
+    box-shadow: inset 0 0 30px #06c;
+}
+
+.lottery-page .num-item:not(:last-child) {
+    margin-right: 40px;
 }
 
 .lottery-page .lucky {
@@ -29,11 +42,15 @@
 }
 
 .lottery-page .lucky .num-item {
-    background: darkseagreen;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    background: #1AFF8C;
+    box-shadow: inset 0 0 40px #00994D;
 }
 
 .lottery-page .num-item.active {
-    background: orange;
+    background: #FFD480;
 }
 
 .lottery-page .last-round {

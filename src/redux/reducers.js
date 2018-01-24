@@ -11,7 +11,7 @@ const numbersInCounts = [20, 6, 3]
 
 const GAME_HANDLERS = {
   [CLEAR_ALL]: (state) => {
-    return {...state, dots: [], circle: null, prevCircle: null, lucky: {}, round: 0, status: ''}
+    return {...state, dots: [], circle: null, prevCircles: [], lucky: {}, round: 0, status: ''}
   },
   [GENERATE_MAP]: (state) => {
     const dots = Array.from({length: 100}).map((n, i) => ({x: i % 10 + 1, y: Math.floor(i / 10) + 1}))
@@ -34,7 +34,7 @@ const GAME_HANDLERS = {
     const dots = state.dots.slice().sort(() => Math.random() - 0.5).map((dot) => {
       const {x: dx, y: dy, exit} = dot
       if (exit) return dot
-      if (Math.abs(x - dx) <= r && Math.abs(y - dy) <= r && (dx - x) * (dx - x) + (dy - y) * (dy - y) <= r * r) {
+      if ((dx - x) * (dx - x) + (dy - y) * (dy - y) <= r * r) {
         if (inIndex < inNumbers.length) {
           return {...dot, number: inNumbers[inIndex++]}
         } else {
@@ -48,7 +48,12 @@ const GAME_HANDLERS = {
         }
       }
     })
-    return {...state, circle: {x, y, r}, prevCircle: state.circle, dots, round: state.round + 1, status: 'game'}
+    return {
+      ...state,
+      circle: {x, y, r},
+      prevCircles: state.prevCircles.concat(circle ? circle : []),
+      dots, round: state.round + 1, status: 'game'
+    }
   },
   [END_ROUND]: (state) => {
     const {dots: prevDots, circle: {x, y, r}, round} = state
@@ -115,6 +120,7 @@ const initialState = {
   dots: [],
   players: [],
   lucky: {},
+  prevCircles: [],
   round: 0,
   status: ''
 }

@@ -6,7 +6,7 @@ import './players.css'
 
 import {addPlayer, removePlayer, changeNumber} from '../../redux/actions'
 
-class Record extends Component {
+class Players extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -20,7 +20,7 @@ class Record extends Component {
     const {id, number, isOuter} = this.state
     if (!id) return message.warn('请输入姓名', 1)
     if (!number || !number.trim()) return dispatch(addPlayer({id, isOuter}))
-    const convertNumber = parseInt(number)
+    const convertNumber = parseInt(number, 10)
     if (!(convertNumber >= 1 && convertNumber <= 100)) return message.warn('请输入1至100之间的号码', 1)
     if (round > 0) return message.warn('游戏已开始，无法操作', 1)
     const usedNumbers = players.filter(p => p.number).map(p => p.number)
@@ -97,24 +97,51 @@ class Record extends Component {
     return !exitNumbers.includes(player.number)
   }
 
+  openNumberModal = (player) => {
+    this.setState({selectingPlayer: player, showNumbersModal: true})
+  }
+
   handleChangeNumber = () => {
-    const {selectingPlayer, selectedNumber} = this.state
+    const {selectingPlayer, selectedNumber, switchAnimating} = this.state
     if (!selectingPlayer || !selectedNumber) return
-    const successRate = selectingPlayer.isOuter ? 0 : 0.5
-    if (Math.random() < successRate) {
-      Modal.success({title: '换号结果', content: '恭喜您，换号成功~'})
-      this.props.dispatch(changeNumber(({id: selectingPlayer.id, number: selectedNumber})))
-    } else {
-      Modal.error({title: '换号结果', content: '很抱歉，换号失败...'})
-    }
-    this.setState({selectingPlayer: null, selectedNumber: null, showNumbersModal: false})
+    if (switchAnimating) return
+    this.numberIndicator.classList.add('animate')
+    this.setState({switchAnimating: true})
+    const successRate = selectingPlayer.isOuter ? 0 : 0.8
+    setTimeout(() => {
+      this.numberIndicator.classList.remove('animate')
+      if (Math.random() < successRate) {
+        this.numberIndicator.classList.add('success')
+        this.props.dispatch(changeNumber(({id: selectingPlayer.id, number: selectedNumber})))
+        setTimeout(() => {
+          this.setState({selectingPlayer: null, selectedNumber: null, showNumbersModal: false, switchAnimating: false})
+          Modal.success({title: '换号结果', content: '恭喜您，换号成功~'})
+          this.numberIndicator.classList.remove('success')
+        }, 1200)
+      } else {
+        setTimeout(() => {
+          this.setState({selectingPlayer: null, selectedNumber: null, showNumbersModal: false, switchAnimating: false})
+          Modal.error({title: '换号结果', content: '很抱歉，换号失败...'})
+        }, 1200)
+      }
+    }, 1500)
+  }
+
+  handleCancel = () => {
+    const {switchAnimating} = this.state
+    if (switchAnimating) return
+    this.setState({selectingPlayer: null, showNumbersModal: false, selectedNumber: null})
   }
 
   render() {
-    const {game: {round, players}} = this.props
-    const {filterValue, showNumbersModal, selectedNumber, id, number, isOuter} = this.state
+    const {game: {round, players, lucky}} = this.props
+    const {filterValue, showUnlucky, selectingPlayer, showNumbersModal, selectedNumber, id, number, isOuter} = this.state
     const availableInside = this.getAvailableNumbers(true)
     const availableOutside = this.getAvailableNumbers(false)
+    let luckyNumbers = []
+    Object.keys(lucky).forEach(key => {
+      luckyNumbers = luckyNumbers.concat(lucky[key])
+    })
     return (
       <div className='players-page'>
         {round === 0 &&
@@ -130,28 +157,31 @@ class Record extends Component {
         </div>
         }
         <div className='player-list'>
-          <div className='filter'>
+          <div className='filter clearfix'>
             <Input placeholder='输入姓名筛选' value={filterValue} onChange={e => this.setState({filterValue: e.target.value})}/>
+            <Checkbox checked={showUnlucky} onChange={e => this.setState({showUnlucky: e.target.checked})}>仅显示未中奖</Checkbox>
           </div>
           <table>
             <thead>
             <tr>
+              <th>序号</th>
               <th>姓名</th>
               <th>号码</th>
               <th>状态</th>
               <th>换号</th>
-              <th>操作</th>
+              <th style={{width: 1, whiteSpace: 'nowrap'}}>操作</th>
             </tr>
             </thead>
             <tbody>
-            {players.slice().reverse().filter(({id}) => id.includes(filterValue || '')).map((player, i) =>
+            {players.slice().reverse().filter(p => showUnlucky ? !luckyNumbers.includes(p.number) : true).filter(({id}) => id.includes(filterValue || '')).map((player, i) =>
               <tr key={i}>
+                <td>{i + 1}</td>
                 <td>{player.id}</td>
                 <td>{player.number}</td>
                 <td>{this.getPlayerStatus(player)}</td>
                 {this.canChangeNumber(player) ?
                   <td style={{width: 72}}>
-                    <Button type='primary' onClick={() => this.setState({selectingPlayer: player, showNumbersModal: true})}>换号</Button>
+                    <Button type='primary' onClick={() => this.openNumberModal(player)}>换号</Button>
                   </td> :
                   <td/>
                 }
@@ -185,8 +215,18 @@ class Record extends Component {
         <Modal title='换号' okText='确定' cancelText='取消' className='change-number-modal'
                visible={showNumbersModal}
                onOk={this.handleChangeNumber}
-               onCancel={() => this.setState({showNumbersModal: false})}>
-          <div className='selected'>当前选取：{selectedNumber}</div>
+               onCancel={this.handleCancel}>
+          <div className='switch clearfix'>
+            <div className='current'>
+              <div className='num-item'>{selectingPlayer && selectingPlayer.number}</div>
+              <div>当前号码</div>
+            </div>
+            <div className='selected'>
+              <div className='num-item'>{selectedNumber}</div>
+              <div>选取号码</div>
+            </div>
+            <div className='indicator' ref={div => this.numberIndicator = div}/>
+          </div>
           <div className='numbers numbers-in'>
             <div className='title'>圈内可选</div>
             <div className='list'>
@@ -209,4 +249,4 @@ class Record extends Component {
   }
 }
 
-export default connect(({game}) => ({game}))(Record)
+export default connect(({game}) => ({game}))(Players)

@@ -30,7 +30,7 @@ class Game extends Component {
   openPicker = () => {
     const {game: {players}} = this.props
     if (players.find(p => !p.number)) return message.warn('尚有玩家未分配号码', 1)
-    this.setState({picking: true})
+    this.setState({picking: true, centerX: 0, centerY: 0, radius: 0, pickEnabled: false})
   }
 
   pickCenter = (e) => {
@@ -39,7 +39,7 @@ class Game extends Component {
     const rect = this.mapDom.getBoundingClientRect()
     const centerX = ((pageX - rect.x) / 60).toFixed(2)
     const centerY = ((pageY - rect.y) / 60).toFixed(2)
-    const {game: {circle, dots}} = this.props
+    const {game: {circle, dots, round}} = this.props
     let radius = 0
     if (!circle) {
       radius = Math.min(centerX - 1, centerY - 1, 10 - centerX, 10 - centerY)
@@ -48,16 +48,25 @@ class Game extends Component {
       radius = circle.r - centerDistance
     }
     radius = radius.toFixed(2)
+    if (radius < 1) return this.setState({pickEnabled: false})
     let inCount = 0
     let outCount = 0
-    dots.forEach(({x, y}) => {
+    dots.forEach(({x, y, exit}) => {
+      if (exit) return
       if (Math.abs(x - centerX) <= radius && Math.abs(y - centerY) <= radius && (centerX - x) * (centerX - x) + (centerY - y) * (centerY - y) <= radius * radius) {
         inCount++
       } else {
         outCount++
       }
     })
-    this.setState({centerX, centerY, radius, inCount, outCount})
+    console.log('in circle dots', inCount)
+    console.log('out circle dots', outCount)
+    if ((round === 0 && inCount <= 36) || (round === 1 && (inCount <= 12 || outCount <= 20)) || (round === 2 && (inCount <= 4 || outCount <= 6))) {
+      this.setState({pickEnabled: false})
+    } else {
+      this.setState({pickEnabled: true})
+    }
+    this.setState({centerX, centerY, radius})
   }
 
   generateCircle = () => {
@@ -93,8 +102,8 @@ class Game extends Component {
   }
 
   render() {
-    const {picking, centerX, centerY, radius, inCount, outCount} = this.state
-    const {game: {dots, circle, status, round}, dispatch} = this.props
+    const {picking, centerX, centerY, radius, pickEnabled} = this.state
+    const {game: {dots, circle, prevCircles, status, round}, dispatch} = this.props
     return (
       <div className='game'>
         <div className='init'>
@@ -121,8 +130,7 @@ class Game extends Component {
                 <span className='hint'>请在地图中点击选取圆心</span>
                 {centerX > 0 && centerY > 0 && <span className='circle-center'>圆心：{centerX}, {centerY}</span>}
                 {radius > 0 && <span className='circle-radius'>半径：{radius}</span>}
-                {inCount > 0 && outCount > 0 && <span className='count'>圈内：{inCount} 圈外：{outCount}</span>}
-                <Button onClick={this.generateCircle} type='primary'>生成圆圈</Button>
+                <Button onClick={this.generateCircle} type='primary' disabled={!pickEnabled}>生成圆圈</Button>
               </div>
             }
           </div>
@@ -155,6 +163,14 @@ class Game extends Component {
             <div className='radar'/>
           </div>
           }
+          {prevCircles.map((c, i) =>
+            <div key={i} className='prev-circle' style={{
+              width: c.r * 2 * 60, height: c.r * 2 * 60,
+              left: (c.x - c.r) * 60, top: (c.y - c.r) * 60
+            }}>
+              <div className='radar'/>
+            </div>
+          )}
         </div>
       </div>
     )

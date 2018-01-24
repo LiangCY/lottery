@@ -9,27 +9,27 @@
     margin-bottom: 8px;
 }
 
-.available {
+.players-page .available {
     position: fixed;
     top: 280px;
     right: 20px;
     width: 240px;
 }
 
-.available .list {
+.players-page .available .list {
     margin-bottom: 10px;
 }
 
-.available .num-item {
+.players-page .available .num-item {
     display: inline-block;
     width: 40px;
 }
 
-.available .list-in {
+.players-page .available .list-in {
     color: #2EB873;
 }
 
-.available .list-out {
+.players-page .available .list-out {
     color: #FF6633;
 }
 
@@ -38,8 +38,17 @@
 }
 
 .player-list .filter {
-    width: 300px;
     margin-bottom: 12px;
+}
+
+.player-list .filter .ant-input {
+    width: 200px;
+    float: left;
+}
+
+.player-list .filter .ant-checkbox-wrapper {
+    float: right;
+    margin-top: 5px;
 }
 
 .player-list table {
@@ -57,26 +66,43 @@
     border-bottom: 1px solid #d2d3df;
 }
 
-.player-list td.numbers {
-
+.change-number-modal .switch {
+    position: relative;
+    width: 240px;
+    margin: 12px auto 20px;
 }
 
-.player-list td.numbers a {
-    display: inline-block;
-    width: 40px;
-    cursor: pointer;
-}
-
-.player-list td.numbers .inside a {
-    color: #42dcdc;
-}
-
-.player-list td.numbers .outside a {
-    color: #ed9877;
-}
-
+.change-number-modal .current,
 .change-number-modal .selected {
+    float: left;
+    width: 120px;
     font-weight: bold;
+    text-align: center;
+}
+
+.change-number-modal .switch .num-item {
+    height: 30px;
+    font-size: 20px;
+}
+
+.change-number-modal .switch .indicator {
+    position: absolute;
+    width: 16px;
+    height: 11px;
+    margin-left: -8px;
+    top: -12px;
+    left: 60px;
+    background: url("./pointer.svg") no-repeat center;
+    background-size: contain;
+}
+
+.change-number-modal .switch .indicator.animate {
+    animation: pointerMove .12s infinite ease-in-out;
+    animation-direction: alternate;
+}
+
+.change-number-modal .switch .indicator.success {
+    left: 180px;
 }
 
 .change-number-modal .numbers {
@@ -106,4 +132,13 @@
 
 .change-number-modal .numbers-out .list > span {
     background: #FF6633;
+}
+
+@keyframes pointerMove {
+    0% {
+        left: 60px;
+    }
+    100% {
+        left: 180px;
+    }
 }
