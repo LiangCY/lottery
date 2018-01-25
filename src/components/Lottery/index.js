@@ -45,6 +45,7 @@ class Lottery extends Component {
     const total = this.getLotteryNumbers().length
     this.setState({moving: true})
     this.move(total)
+    this.audio.play()
   }
 
   move = (total) => {
@@ -55,6 +56,8 @@ class Lottery extends Component {
   stop = () => {
     if (!this.state.moving) return
     cancelAnimationFrame(this.animation)
+    this.audio.pause()
+    this.audio.currentTime = 0
     const {game: {players}, dispatch} = this.props
     const {active} = this.state
     const otherNumbers = this.getLotteryNumbers()
@@ -76,7 +79,7 @@ class Lottery extends Component {
     const {game: {round, lucky}, dispatch} = this.props
     const luckyNumbers = lucky[round] || []
     if (luckyNumbers.length >= awardCounts[round - 1]) return
-    const number = parseInt(this.numberInput.input.value)
+    const number = parseInt(this.numberInput.input.value, 10)
     if (!number) return
     const otherNumbers = this.getLotteryNumbers()
     if (!otherNumbers.includes(number)) return
@@ -100,6 +103,9 @@ class Lottery extends Component {
             <Button type='primary' size='large' ghost disabled={!moving} onClick={this.stop}>结束</Button>
           </div>
           }
+          <audio ref={audio => this.audio = audio} loop>
+            <source src={require('./running.wav')}/>
+          </audio>
           {round === 4 &&
           <div className='actions'>
             <Input size='large' placeholder='请输入中奖号码' onPressEnter={this.enterLuckyNumber} ref={input => this.numberInput = input}/>
