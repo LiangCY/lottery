@@ -1,9 +1,28 @@
 .lottery-page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
-    background: url("./background.jpg") no-repeat center;
-    background-size: cover;
     height: calc(100vh - 80px);
     padding: 20px 40px;
+}
+
+.lottery-page > .background {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: url("./background.jpg") no-repeat center;
+    background-size: cover;
+    opacity: 0.6;
+    z-index: 1;
+}
+
+.lottery-page > .content {
+    position: relative;
+    z-index: 2;
 }
 
 .lottery-page .round {

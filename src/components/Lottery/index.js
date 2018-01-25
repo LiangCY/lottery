@@ -91,35 +91,38 @@ class Lottery extends Component {
     const otherNumbers = this.getLotteryNumbers()
     return (
       <div className='lottery-page'>
-        <div className='round'>第{round}轮</div>
-        {round < 4 &&
-        <div className='actions'>
-          <Button type='primary' size='large' style={{marginRight: 20}} disabled={moving} onClick={this.start}>开始</Button>
-          <Button type='primary' size='large' ghost disabled={!moving} onClick={this.stop}>结束</Button>
-        </div>
-        }
-        {round === 4 &&
-        <div className='actions'>
-          <Input size='large' placeholder='请输入中奖号码' onPressEnter={this.enterLuckyNumber} ref={input => this.numberInput = input}/>
-        </div>
-        }
-        <div className='numbers'>
-          <div className='others'>
-            {otherNumbers.map((n, i) =>
-              <span key={i} className={classNames('num-item', {active: active === i})}>{n}</span>
-            )}
+        <div className='background'/>
+        <div className='content'>
+          <div className='round'>第{round}轮</div>
+          {round < 4 &&
+          <div className='actions'>
+            <Button type='primary' size='large' style={{marginRight: 20}} disabled={moving} onClick={this.start}>开始</Button>
+            <Button type='primary' size='large' ghost disabled={!moving} onClick={this.stop}>结束</Button>
           </div>
-          <div className='lucky'>
-            {luckyNumbers.map((n, i) =>
-              <span key={i} className='num-item'>{n}</span>
-            )}
+          }
+          {round === 4 &&
+          <div className='actions'>
+            <Input size='large' placeholder='请输入中奖号码' onPressEnter={this.enterLuckyNumber} ref={input => this.numberInput = input}/>
           </div>
+          }
+          <div className='numbers'>
+            <div className='others'>
+              {otherNumbers.map((n, i) =>
+                <span key={i} className={classNames('num-item', {active: active === i})}>{n}</span>
+              )}
+            </div>
+            <div className='lucky'>
+              {luckyNumbers.map((n, i) =>
+                <span key={i} className='num-item'>{n}</span>
+              )}
+            </div>
+          </div>
+          {status === 'lottery' && round === 3 &&
+          <div className='last-round'>
+            <Button type='primary' size='large' onClick={this.startLastRound}>最后一轮</Button>
+          </div>
+          }
         </div>
-        {status === 'lottery' && round === 3 &&
-        <div className='last-round'>
-          <Button type='primary' size='large' onClick={this.startLastRound}>最后一轮</Button>
-        </div>
-        }
       </div>
     )
   }

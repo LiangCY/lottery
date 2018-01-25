@@ -173,7 +173,7 @@ class Players extends Component {
             </tr>
             </thead>
             <tbody>
-            {players.slice().reverse().filter(p => showUnlucky ? !luckyNumbers.includes(p.number) : true).filter(({id}) => id.includes(filterValue || '')).map((player, i) =>
+            {players.slice().reverse().filter(p => showUnlucky ? !p.isOuter && !luckyNumbers.includes(p.number) : true).filter(({id}) => id.includes(filterValue || '')).map((player, i) =>
               <tr key={i}>
                 <td>{i + 1}</td>
                 <td>{player.id}</td>

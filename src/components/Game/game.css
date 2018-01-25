@@ -18,7 +18,7 @@
 
 .game .actions {
     height: 32px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .game .center-picker .hint {
@@ -43,7 +43,6 @@
 
 .game .map {
     position: relative;
-    margin-top: 40px;
     width: 660px;
     height: 660px;
     background: url("./map.jpg") no-repeat center;
@@ -128,6 +127,18 @@
     position: absolute;
     border-radius: 50%;
     border: 1px solid #ffff99;
+}
+
+.game .fullscreen {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #22aa87;
+    cursor: pointer;
+}
+
+.game .fullscreen .anticon-scan{
+    margin-right: 6px;
 }
 
 @keyframes rotate {

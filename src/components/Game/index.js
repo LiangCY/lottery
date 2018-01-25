@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux'
 import classNames from 'classnames'
-import {Button, Modal, message} from 'antd'
+import {Button, Modal, Icon, message} from 'antd'
 
 import './game.css'
 
@@ -11,6 +11,14 @@ class Game extends Component {
   constructor(props) {
     super(props)
     this.state = {picking: false}
+  }
+
+  componentDidMount() {
+    document.addEventListener('webkitfullscreenchange', this.handleFullScreenChange)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('webkitfullscreenchange', this.handleFullScreenChange)
   }
 
   clearAll = () => {
@@ -101,6 +109,21 @@ class Game extends Component {
     })
   }
 
+  fullScreenMap = () => {
+    this.mapDom.webkitRequestFullScreen && this.mapDom.webkitRequestFullScreen()
+  }
+
+  handleFullScreenChange = () => {
+    if (document.webkitIsFullScreen) {
+      const ratioX = (window.innerWidth - 40) / 660
+      const ratioY = (window.innerHeight - 40) / 660
+      const ratio = Math.min(ratioX, ratioY)
+      this.mapDom.style.transform = `scale(${ratio})`
+    } else {
+      this.mapDom.style.transform = ''
+    }
+  }
+
   render() {
     const {picking, centerX, centerY, radius, pickEnabled} = this.state
     const {game: {dots, circle, prevCircles, status, round}, dispatch} = this.props
@@ -171,6 +194,9 @@ class Game extends Component {
               <div className='radar'/>
             </div>
           )}
+        </div>
+        <div className='fullscreen' onClick={this.fullScreenMap}>
+          <Icon type="scan"/>全屏
         </div>
       </div>
     )
